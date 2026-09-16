@@ -165,8 +165,14 @@ def process_utterance(n_src, librispeech_dir, wham_dir, freq, mode, subdirs, dir
                                          subdirs, dir_path, freq,
                                          n_src)
     # Write the noise and get its path
-    abs_noise_path = write_noise(mix_id, transformed_sources, dir_path,
-                                 freq)
+    # <<<<< 원본 - types 가 mix_clean 뿐이면 위 105-106 줄이 subdirs 에서 'noise' 를 빼
+    #       noise/ 폴더를 만들지 않는데, 여기서는 무조건 써서 LibsndfileError 로 죽음
+    # abs_noise_path = write_noise(mix_id, transformed_sources, dir_path,
+    #                              freq)
+    # <<<<< 고친 것 - noise/ 폴더가 있을 때만 씀.
+    #       mix_clean 에서는 이 값이 404-406 줄에서 noise_path=[] 로 버려지므로 '' 로 둬도 됨
+    abs_noise_path = (write_noise(mix_id, transformed_sources, dir_path, freq)
+                      if 'noise' in subdirs else '')
     # Mixtures are different depending on the subdir
     for subdir in subdirs:
         if subdir == 'mix_clean':
